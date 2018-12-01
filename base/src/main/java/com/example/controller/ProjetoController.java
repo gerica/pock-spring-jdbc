@@ -26,42 +26,116 @@ import com.example.controller.wrapper.ResponseWrapper;
 @RestController
 @RequestMapping(ProjetoController.URL)
 public class ProjetoController {
-	static final String URL = "/projeto";
+	private static final Logger log = LoggerFactory.getLogger(ProjetoController.class);
 
 	private static final String SELECT_FROM_TB_PROJETO = "select * from \"TBProjeto\";";
-	private String INSERT_INTO = "INSERT INTO public.\"TBProjeto\"(%s) VALUES (%s)";
-	private String DELETE_INTO = "DELETE FROM public.\"TBProjeto\" WHERE \"IDProjeto\"=%s";
+	static final String URL = "/projeto";
+	private String DELETE_TABLE = "DELETE FROM public.\"TBProjeto\" WHERE \"IDProjeto\"=%s";
 
-	private static final Logger log = LoggerFactory.getLogger(ProjetoController.class);
+	private String INSERT_TABLE = "INSERT INTO public.\"TBProjeto\"(%s) VALUES (%s)";
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-	@GetMapping()
-	public ResponseEntity<List<Map<String, Object>>> fetchAll() {
-		log.info("ProjetoController.fetchAll()");
+	private String SELECT_FROM_ID = "select * from \"TBProjeto\" WHERE \"IDProjeto\"=%s";
 
-		return ResponseEntity.ok().body(jdbcTemplate.queryForList(SELECT_FROM_TB_PROJETO, new Object[] {}));
-	}
-
-	@PostMapping
-	public ResponseEntity<Serializable> save(@RequestBody Map<String, String> mapJson) {
-		log.info("ProjetoController.gravar()");
-
-		String namesColumns = mapJson.keySet().stream().map(e -> "\"" + e.toString() + "\"").collect(Collectors.joining(","));
-		String valuesColumns = mapJson.values().stream().map(e -> "?").collect(Collectors.joining(","));
-
-		int rowsAffected = jdbcTemplate.update(String.format(INSERT_INTO, namesColumns, valuesColumns), mapJson.values().toArray());
-
-		return ResponseEntity.ok().body(new ResponseWrapper(rowsAffected));
-	}
+	private String UPDATE_TABLE = "UPDATE public.\"TBProjeto\" SET %s WHERE \"IDProjeto\"=%s";
 
 	@DeleteMapping("/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> delete(@PathVariable int id) {
 		log.info("ProjetoController.delete()");
 
-		int rowsAffected = jdbcTemplate.update(String.format(DELETE_INTO, id));
+		int rowsAffected = jdbcTemplate.update(String.format(DELETE_TABLE, id));
 		return ResponseEntity.ok().body(new ResponseWrapper(rowsAffected));
+	}
+
+	@GetMapping()
+	public ResponseEntity<List<Map<String, Object>>> fetchAll() {
+		log.info("ProjetoController.fetchAll()");
+
+		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_FROM_TB_PROJETO, new Object[] {});
+		return ResponseEntity.ok().body(result);
+	}
+
+	@GetMapping("/{id}")
+	@ResponseBody
+	public ResponseEntity<Object> fetchById(@PathVariable int id) {
+		log.info("ProjetoController.fetchById()");
+
+		List<Map<String, Object>> result = jdbcTemplate.queryForList(String.format(SELECT_FROM_ID, id), new Object[] {});
+		return ResponseEntity.ok().body(new ResponseWrapper(result));
+	}
+
+	private String getColumnWithType(String value) {
+		if (isInteger(value)) {
+			return value;
+		}
+		return "'" + value + "'";
+	}
+
+	private ResponseEntity<Serializable> insert(Map<String, String> mapJson) {
+		String namesColumns = mapJson.keySet().stream().map(e -> "\"" + e.toString() + "\"").collect(Collectors.joining(","));
+		String valuesColumns = mapJson.values().stream().map(e -> "?").collect(Collectors.joining(","));
+
+		int rowAffected = jdbcTemplate.update(String.format(INSERT_TABLE, namesColumns, valuesColumns), mapJson.values().toArray());
+		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
+	}
+
+	public boolean isInteger(String str) {
+		if (str == null) {
+			return false;
+		}
+		if (str.isEmpty()) {
+			return false;
+		}
+		int i = 0;
+		if (str.charAt(0) == '-') {
+			if (str.length() == 1) {
+				return false;
+			}
+			i = 1;
+		}
+		for (; i < str.length(); i++) {
+			char c = str.charAt(i);
+			if (c < '0' || c > '9') {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@PostMapping
+	public ResponseEntity<Serializable> save(@RequestBody Map<String, String> mapJson) {
+		log.info("ProjetoController.gravar()");
+
+		for (String key : mapJson.keySet()) {
+			if (key == "IDProjeto") {
+				return update(mapJson);
+			}
+		}
+
+		return insert(mapJson);
+	}
+
+	private ResponseEntity<Serializable> update(Map<String, String> mapJson) {
+		StringBuilder sets = new StringBuilder();
+		String primaryKey = null;
+		for (String key : mapJson.keySet()) {
+			if (key == "IDProjeto") {
+				primaryKey = getColumnWithType(mapJson.get(key));
+				continue;
+			}
+			sets.append("\"");
+			sets.append(key);
+			sets.append("\"");
+			sets.append("=");
+			sets.append(getColumnWithType(mapJson.get(key)));
+			sets.append(", ");
+		}
+		sets.replace(sets.length() - 2, sets.length(), "");
+		int rowAffected = jdbcTemplate.update(String.format(UPDATE_TABLE, sets.toString(), primaryKey));
+
+		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
 	}
 }
