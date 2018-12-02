@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.example.*" })
+//@EnableAspectJAutoProxy
 public class BaseApplication {
 
 	public static void main(String[] args) {
