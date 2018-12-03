@@ -22,46 +22,73 @@ import com.example.config.annotation.PrepareEntity;
 import com.example.controller.wrapper.ResponseWrapper;
 import com.example.util.UtilAtributo;
 
-//@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
-//@RestController
-//@RequestMapping(ProjetoController.URL)
-public class ProjetoController {
-	private static final String SELECT_FROM_TB_PROJETO = "select * from \"TBProjeto\";";
-	static final String URL = "/projeto";
-	private String DELETE_TABLE = "DELETE FROM public.\"TBProjeto\" WHERE \"IDProjeto\"=%s";
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+@RestController
+@RequestMapping(BaseController.URL)
+public class BaseController {
 
-	private String INSERT_TABLE = "INSERT INTO public.\"TBProjeto\"(%s) VALUES (%s)";
+	protected static final String URL = "/base";
+	public String namePrimaryKey;
+	public String nameTable;
 
-	private String SELECT_FROM_ID = "select * from \"TBProjeto\" WHERE \"IDProjeto\"=%s";
+	private String DELETE_TABLE = "DELETE FROM public.\"%s\" WHERE \"%s\"=%s";
 
-	private String UPDATE_TABLE = "UPDATE public.\"TBProjeto\" SET %s WHERE \"IDProjeto\"=%s";
+	private String INSERT_TABLE = "INSERT INTO public.\"%s\"(%s) VALUES (%s)";
 
+	private String SELECT_FROM_ALL = "select * from \"%s\";";
+	private String SELECT_FROM_ID = "select * from \"%s\" WHERE \"%s\"=%s";
+	private String UPDATE_TABLE = "UPDATE public.\"%s\" SET %s WHERE \"%s\"=%s";
 	@Autowired
-	JdbcTemplate jdbcTemplate;
+	protected JdbcTemplate jdbcTemplate;
+
+	public BaseController() {
+		super();
+	}
 
 	@DeleteMapping("/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> delete(@PathVariable int id) {
-		int rowsAffected = jdbcTemplate.update(String.format(DELETE_TABLE, id));
+		if (getNameTable() == null || getNamePrimaryKey() == null) {
+			throw new RuntimeException("Informe o nome da tabela e o id.");
+		}
+		int rowsAffected = jdbcTemplate.update(String.format(DELETE_TABLE, getNameTable(), getNamePrimaryKey(), id));
 		return ResponseEntity.ok().body(new ResponseWrapper(rowsAffected));
 	}
 
+	// @RequestHeader("table") String table
 	@GetMapping()
 	public ResponseEntity<List<Map<String, Object>>> fetchAll() {
-		List<Map<String, Object>> result = jdbcTemplate.queryForList(SELECT_FROM_TB_PROJETO, new Object[] {});
+		if (getNameTable() == null) {
+			throw new RuntimeException("Informe a tabela");
+		}
+		List<Map<String, Object>> result = jdbcTemplate.queryForList(String.format(SELECT_FROM_ALL, getNameTable()), new Object[] {});
 		return ResponseEntity.ok().body(result);
 	}
 
 	@GetMapping("/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> fetchById(@PathVariable int id) {
-		List<Map<String, Object>> result = jdbcTemplate.queryForList(String.format(SELECT_FROM_ID, id), new Object[] {});
+		if (getNameTable() == null || getNamePrimaryKey() == null) {
+			throw new RuntimeException("Informe o nome da tabela e o id.");
+		}
+		List<Map<String, Object>> result = jdbcTemplate.queryForList(String.format(SELECT_FROM_ID, getNameTable(), getNamePrimaryKey(), id), new Object[] {});
 		return ResponseEntity.ok().body(new ResponseWrapper(result));
+	}
+
+	public String getNamePrimaryKey() {
+		return namePrimaryKey;
+	}
+
+	public String getNameTable() {
+		return nameTable;
 	}
 
 	@PostMapping
 	@PrepareEntity
 	public ResponseEntity<Serializable> save(@RequestBody Map<String, String> mapJson) {
+		if (getNameTable() == null) {
+			throw new RuntimeException("Informe a tabela");
+		}
 		for (String key : mapJson.keySet()) {
 			if (key == "IDProjeto") {
 				return update(mapJson);
@@ -71,17 +98,25 @@ public class ProjetoController {
 		return insert(mapJson);
 	}
 
+	public void setNamePrimaryKey(String namePrimaryKey) {
+		this.namePrimaryKey = namePrimaryKey;
+	}
+
+	public void setNameTable(String nameTable) {
+		this.nameTable = nameTable;
+	}
+
 	private ResponseEntity<Serializable> insert(Map<String, String> mapJson) {
 		String namesColumns = mapJson.keySet().stream().map(e -> "\"" + e.toString() + "\"").collect(Collectors.joining(","));
 		String valuesColumns = mapJson.keySet().stream().map(e -> "?").collect(Collectors.joining(","));
 
-		int rowAffected = jdbcTemplate.update(String.format(INSERT_TABLE, namesColumns, valuesColumns), mapJson.values().toArray());
+		int rowAffected = jdbcTemplate.update(String.format(INSERT_TABLE, getNameTable(), namesColumns, valuesColumns), mapJson.values().toArray());
 		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
 	}
 
 	private ResponseEntity<Serializable> update(Map<String, String> mapJson) {
-
-		int rowAffected = jdbcTemplate.update(UtilAtributo.prepararUpdate(mapJson, UPDATE_TABLE, "TBProjeto", "IDProjeto"));
+		System.out.println(UtilAtributo.prepararUpdate(mapJson, UPDATE_TABLE, getNameTable(), getNamePrimaryKey()));
+		int rowAffected = jdbcTemplate.update(UtilAtributo.prepararUpdate(mapJson, UPDATE_TABLE, getNameTable(), getNamePrimaryKey()));
 		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
 	}
 

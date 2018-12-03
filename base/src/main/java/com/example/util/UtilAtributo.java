@@ -7,6 +7,17 @@ import java.util.Map;
 
 public class UtilAtributo {
 
+	public static LocalDate convertStringToDate(String inDate) {
+
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+
+		try {
+			return LocalDate.parse(inDate, inputFormatter);
+		} catch (Exception pe) {
+			return null;
+		}
+	}
+
 	public static boolean isInteger(String str) {
 		if (str == null) {
 			return false;
@@ -30,11 +41,11 @@ public class UtilAtributo {
 		return true;
 	}
 
-	public static String prepararUpdate(Map<String, String> mapJson, String query, String nameKey) {
+	public static String prepararUpdate(Map<String, String> mapJson, String query, String nameTable, String nameKey) {
 		StringBuilder sets = new StringBuilder();
 		Object primaryKey = null;
 		for (String key : mapJson.keySet()) {
-			if (key == nameKey) {
+			if (key.equals(nameKey) || key == nameKey) {
 				primaryKey = getColumnWithType(mapJson.get(key));
 				continue;
 			}
@@ -46,7 +57,7 @@ public class UtilAtributo {
 			sets.append(", ");
 		}
 		sets.replace(sets.length() - 2, sets.length(), "");
-		return String.format(query, sets.toString(), primaryKey);
+		return String.format(query, nameTable, sets.toString(), nameKey, primaryKey);
 	}
 
 	/**
@@ -65,14 +76,4 @@ public class UtilAtributo {
 		return "'" + value + "'";
 	}
 
-	public static LocalDate convertStringToDate(String inDate) {
-
-		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
-
-		try {
-			return LocalDate.parse(inDate, inputFormatter);
-		} catch (Exception pe) {
-			return null;
-		}
-	}
 }
