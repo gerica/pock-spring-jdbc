@@ -28,6 +28,7 @@ import com.example.util.UtilAtributo;
 public class BaseController {
 
 	protected static final String URL = "/base";
+	public String nameModule;
 	public String namePrimaryKey;
 	public String nameTable;
 
@@ -75,11 +76,21 @@ public class BaseController {
 		return ResponseEntity.ok().body(new ResponseWrapper(result));
 	}
 
+	public String getNameModule() {
+		return nameModule;
+	}
+
 	public String getNamePrimaryKey() {
+		if (getNameModule() != null) {
+			return "ID" + getNameModule();
+		}
 		return namePrimaryKey;
 	}
 
 	public String getNameTable() {
+		if (getNameModule() != null) {
+			return "TB" + getNameModule();
+		}
 		return nameTable;
 	}
 
@@ -96,6 +107,10 @@ public class BaseController {
 		}
 
 		return insert(mapJson);
+	}
+
+	public void setNameModule(String nameModule) {
+		this.nameModule = nameModule;
 	}
 
 	public void setNamePrimaryKey(String namePrimaryKey) {
