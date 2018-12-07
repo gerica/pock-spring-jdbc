@@ -15,14 +15,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.example.controller.BaseController;
+import com.example.util.AppParams;
 
 @Component
 @Order(1)
 public class TransactionFilter implements Filter {
 
 	@Autowired
-	private BaseController controller;
+	private AppParams appParams;
 
 	@Override
 	public void destroy() {
@@ -38,19 +38,19 @@ public class TransactionFilter implements Filter {
 		String namePrimaryKey = httpRequest.getHeader("NamePrimaryKey");
 
 		if (!StringUtils.isEmpty(nameModule)) {
-			controller.setNameModule(nameModule);
+			appParams.setNameModule(nameModule);
 		} else {
-			controller.setNameModule(null);
+			appParams.setNameModule(null);
 		}
 		if (!StringUtils.isEmpty(nameTable)) {
-			controller.setNameTable(nameTable);
+			appParams.setNameTable(nameTable);
 		} else {
-			controller.setNameTable(null);
+			appParams.setNameTable(null);
 		}
 		if (!StringUtils.isEmpty(namePrimaryKey)) {
-			controller.setNamePrimaryKey(namePrimaryKey);
+			appParams.setNamePrimaryKey(namePrimaryKey);
 		} else {
-			controller.setNamePrimaryKey(null);
+			appParams.setNamePrimaryKey(null);
 		}
 		filterchain.doFilter(request, response);
 	}

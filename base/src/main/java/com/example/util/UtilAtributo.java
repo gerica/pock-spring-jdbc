@@ -41,7 +41,7 @@ public class UtilAtributo {
 		return true;
 	}
 
-	public static String prepararUpdate(Map<String, String> mapJson, String query, String nameTable, String nameKey) {
+	public static String prepararUpdate(Map<String, Object> mapJson, String query, String nameTable, String nameKey) {
 		StringBuilder sets = new StringBuilder();
 		Object primaryKey = null;
 		for (String key : mapJson.keySet()) {

@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import com.example.controller.wrapper.EntityWrapper;
 import com.example.util.UtilAtributo;
 
 @Aspect
@@ -27,21 +28,53 @@ public class EntityConverterAspect {
 		for (int i = 0; i < args.length; i++) {
 			Object raw = args[i];
 			if (raw instanceof Map) {
-				for (Object key : ((Map) raw).keySet()) {
-					Object value = ((Map) raw).get(key);
-					if (value instanceof String) {
-						LocalDate ld = UtilAtributo.convertStringToDate((String) value);
-						if (ld != null) {
-							((Map) raw).put(key, ld);
-						} else if (UtilAtributo.isInteger((String) value)) {
-							((Map) raw).put(key, Integer.parseInt((String) value));
-						}
+				checkMap((Map) raw);
+//				for (Object key : ((Map) raw).keySet()) {
+//					Object value = ((Map) raw).get(key);
+//					if (value instanceof String) {
+//						LocalDate ld = UtilAtributo.convertStringToDate((String) value);
+//						if (ld != null) {
+//							((Map) raw).put(key, ld);
+//						} else if (UtilAtributo.isInteger((String) value)) {
+//							((Map) raw).put(key, Integer.parseInt((String) value));
+//						}
+//					}
+//				}
+			} else if (raw instanceof EntityWrapper) {
+				EntityWrapper entityWrapper = (EntityWrapper) raw;
+				if (entityWrapper.getEntityParent() != null) {
+					checkMap(entityWrapper.getEntityParent());
+				}
+				if (entityWrapper.getEntitiesChilds() != null) {
+					for (Map<String, Object> entity : entityWrapper.getEntitiesChilds()) {
+						checkMap(entity);
+
 					}
 				}
+//				if (entityWrapper.getEntity1() != null) {
+//					checkMap(entityWrapper.getEntity1());
+//				}
+//				if (entityWrapper.getEntity2() != null) {
+//					checkMap(entityWrapper.getEntity2());
+//				}
 			}
 		}
 		// execute original method with new args
 		return pjp.proceed(args);
+	}
+
+	private void checkMap(Map raw) {
+		for (Object key : ((Map) raw).keySet()) {
+			Object value = ((Map) raw).get(key);
+			if (value instanceof String) {
+				LocalDate ld = UtilAtributo.convertStringToDate((String) value);
+				if (ld != null) {
+					((Map) raw).put(key, ld);
+				} else if (UtilAtributo.isInteger((String) value)) {
+					((Map) raw).put(key, Integer.parseInt((String) value));
+				}
+			}
+		}
 	}
 
 }
