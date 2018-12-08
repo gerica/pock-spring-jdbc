@@ -80,7 +80,7 @@ public abstract class CrudController {
 			throw new RuntimeException("Informe a tabela");
 		}
 		for (String key : mapJson.keySet()) {
-			if (key == "IDProjeto") {
+			if (key == appParams.getNamePrimaryKey() || key.equalsIgnoreCase(appParams.getNamePrimaryKey())) {
 				return update(mapJson);
 			}
 		}
