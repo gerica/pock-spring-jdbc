@@ -20,6 +20,7 @@ public class EntityConverterAspect {
 //		System.out.println("***** Starting: " + joinPoint.getSignature().getName() + " *****");
 //	}
 
+	@SuppressWarnings("rawtypes")
 	@Around("@annotation(com.example.config.annotation.PrepareEntity)")
 	public Object convertStringToDate(final ProceedingJoinPoint pjp) throws Throwable {
 		Object[] args = pjp.getArgs();
@@ -29,17 +30,6 @@ public class EntityConverterAspect {
 			Object raw = args[i];
 			if (raw instanceof Map) {
 				checkMap((Map) raw);
-//				for (Object key : ((Map) raw).keySet()) {
-//					Object value = ((Map) raw).get(key);
-//					if (value instanceof String) {
-//						LocalDate ld = UtilAtributo.convertStringToDate((String) value);
-//						if (ld != null) {
-//							((Map) raw).put(key, ld);
-//						} else if (UtilAtributo.isInteger((String) value)) {
-//							((Map) raw).put(key, Integer.parseInt((String) value));
-//						}
-//					}
-//				}
 			} else if (raw instanceof EntityWrapper) {
 				EntityWrapper entityWrapper = (EntityWrapper) raw;
 				if (entityWrapper.getEntityParent() != null) {
@@ -51,18 +41,14 @@ public class EntityConverterAspect {
 
 					}
 				}
-//				if (entityWrapper.getEntity1() != null) {
-//					checkMap(entityWrapper.getEntity1());
-//				}
-//				if (entityWrapper.getEntity2() != null) {
-//					checkMap(entityWrapper.getEntity2());
-//				}
+
 			}
 		}
 		// execute original method with new args
 		return pjp.proceed(args);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void checkMap(Map raw) {
 		for (Object key : ((Map) raw).keySet()) {
 			Object value = ((Map) raw).get(key);
@@ -72,6 +58,8 @@ public class EntityConverterAspect {
 					((Map) raw).put(key, ld);
 				} else if (UtilAtributo.isInteger((String) value)) {
 					((Map) raw).put(key, Integer.parseInt((String) value));
+				} else if ("true".equals(value) || "false".equals(value)) {
+					((Map) raw).put(key, Boolean.parseBoolean((String) value));
 				}
 			}
 		}

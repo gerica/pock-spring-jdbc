@@ -1,9 +1,18 @@
 package com.example.util;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+/**
+ * 
+ * @author rogeriocardoso Essa classe sera criada por request
+ *         https://stackoverflow.com/questions/14731092/spring-request-scope-bean
+ */
+
 @Component
+@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AppParams {
 
 	@Value("${app.module.projeto}")
