@@ -154,6 +154,17 @@ CREATE TABLE public."TBProjetoConveniado"
         ("IDAreaAplicacao")
 );
 
+CREATE TABLE public."TBEstrangeiro"
+(
+    "IDEstrangeiro" serial primary key not null,
+    "NRNome" VARCHAR(255),
+    "NRNumero" VARCHAR(10),
+    "NRPais" VARCHAR(50),
+    "DTVencimento" DATE,
+    "DTNascimento" DATE,
+    "NRSexo" VARCHAR(10)
+);
+
 
 INSERT INTO public."TBTipoProjeto"
     ("NRDescricao")
