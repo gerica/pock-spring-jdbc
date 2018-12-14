@@ -37,15 +37,19 @@ public class AppParams {
 	}
 
 	public String getNamePrimaryKey() {
-		if (getNameModule() != null) {
-			return "ID" + getNameModule();
+		if (namePrimaryKey == null || namePrimaryKey.trim().equals("")) {
+			if (getNameModule() != null) {
+				return "ID" + getNameModule();
+			}
 		}
 		return namePrimaryKey;
 	}
 
 	public String getNameTable() {
-		if (getNameModule() != null) {
-			return "TB" + getNameModule();
+		if (nameTable == null || nameTable.trim().equals("")) {
+			if (getNameModule() != null) {
+				return "TB" + getNameModule();
+			}
 		}
 		return nameTable;
 	}
