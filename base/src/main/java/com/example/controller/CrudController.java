@@ -88,6 +88,16 @@ public abstract class CrudController {
 		return insert(mapJson);
 	}
 
+	@PostMapping("/saveAndReturnId")
+	@PrepareEntity
+	public ResponseEntity<Serializable> saveAndReturnId(@RequestBody Map<String, Object> entity) {
+		Integer id = saveOrUpdate(entity);
+		if (id == null) {
+			id = (Integer) entity.get(appParams.getNamePrimaryKey());
+		}
+		return ResponseEntity.ok().body(new ResponseWrapper(id));
+	}
+
 	protected void attrNameModule(Map<String, Object> entity) {
 		String string = "module";
 		for (Iterator<String> iterator = entity.keySet().iterator(); iterator.hasNext();) {
@@ -136,13 +146,6 @@ public abstract class CrudController {
 					ps.setObject(count++, value);
 
 				}
-//				ps.setObject(1, mapJson.get("IDTipoProjeto"));
-//				ps.setObject(2, mapJson.get("NRIdentificado"));
-//				ps.setObject(3, mapJson.get("NRSigla"));
-//				ps.setObject(4, mapJson.get("NRNome"));
-//				ps.setObject(5, mapJson.get("NREspecificador"));
-//				ps.setObject(6, mapJson.get("DTInicio"));
-//				ps.setObject(7, mapJson.get("DTFim"));
 				return ps;
 			}
 		}, keyHolder);

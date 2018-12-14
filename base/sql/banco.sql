@@ -157,12 +157,33 @@ CREATE TABLE public."TBProjetoConveniado"
 CREATE TABLE public."TBEstrangeiro"
 (
     "IDEstrangeiro" serial primary key not null,
-    "NRNome" VARCHAR(255),
+    "NRDispendio" VARCHAR(50),
     "NRNumero" VARCHAR(10),
     "NRPais" VARCHAR(50),
     "DTVencimento" DATE,
     "DTNascimento" DATE,
     "NRSexo" VARCHAR(10)
+);
+
+DROP TABLE public."TBProjetoConveniado";
+CREATE TABLE public."TBDispendioRecursoHumano"
+(
+    "IDDispendioRecursoHumano" serial primary key not null,
+    "NRNome" VARCHAR(255),
+    "NRCPFColaborador" VARCHAR(14),
+    "IDEstrangeiro" INTEGER,
+    "NRNomeColaborador" VARCHAR(100),
+    "NREscolaridade" VARCHAR(15),
+    "NRFormacao" VARCHAR(20),
+    "NRFormacaoEspecifica" VARCHAR(50),
+    "NRHoraTrabalhada" VARCHAR(8),
+    "DTInicio" DATE,
+    "DTFim" DATE,
+    "NRValor" VARCHAR(20),
+    "DSAtuacao" text,
+    FOREIGN KEY
+        ( "IDEstrangeiro" ) REFERENCES public."TBEstrangeiro"
+        ("IDEstrangeiro")
 );
 
 
