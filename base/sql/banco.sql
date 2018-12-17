@@ -1,13 +1,28 @@
-DROP TABLE "TBDispendioRecursosHumano";
-DROP TABLE "TBProjeto";
-DROP TABLE "TBProjetoConveniado";
-DROP TABLE "TBTipoProjeto";
-DROP TABLE "TBAreaAplicacao";
-DROP TABLE "TBInstituicao";
-DROP TABLE "TBFormacao";
-DROP TABLE "TBTipoDispendio";
-DROP TABLE "TBEscolaridade";
-DROP TABLE "TBEstrangeiro";
+DROP TABLE IF EXISTS "TBDispendioEquipamentoSoftware"
+CASCADE;
+DROP TABLE IF EXISTS "TBDispendioRecursosHumano"
+CASCADE;
+DROP TABLE IF EXISTS "TBProjeto"
+CASCADE;
+DROP TABLE IF EXISTS "TBProjetoConveniado"
+CASCADE;
+DROP TABLE IF EXISTS "TBTipoProjeto"
+CASCADE;
+DROP TABLE IF EXISTS "TBAreaAplicacao"
+CASCADE;
+DROP TABLE IF EXISTS "TBInstituicao"
+CASCADE;
+DROP TABLE IF EXISTS "TBFormacao"
+CASCADE;
+DROP TABLE IF EXISTS "TBTipoDispendio"
+CASCADE;
+DROP TABLE IF EXISTS "TBEscolaridade"
+CASCADE;
+DROP TABLE IF EXISTS "TBEstrangeiro"
+CASCADE;
+DROP TABLE IF EXISTS "TBTipoApropriacao"
+CASCADE;
+
 
 
 CREATE TABLE "TBTipoProjeto"
@@ -22,7 +37,6 @@ CREATE TABLE "TBAreaAplicacao"
     "CDCodigo" INTEGER,
     "NRNome" VARCHAR(255)
 );
-
 
 CREATE TABLE "TBInstituicao"
 (
@@ -42,13 +56,11 @@ CREATE TABLE "TBEstrangeiro"
     "NRSexo" VARCHAR(10)
 );
 
-
 CREATE TABLE "TBFormacao"
 (
     "CDFormacao" serial primary key not null,
     "NOFormacao" VARCHAR(50)
 );
-
 
 CREATE TABLE "TBTipoDispendio"
 (
@@ -57,13 +69,18 @@ CREATE TABLE "TBTipoDispendio"
     "TPDispendio" INTEGER
 );
 
-
 CREATE TABLE "TBEscolaridade"
 (
     "CDEscolaridade" serial primary key not null,
     "NOEscolaridade" VARCHAR(50)
 );
 
+CREATE TABLE "TBTipoApropriacao"
+(
+    "CDTipoApropriacao" serial primary key not null,
+    "TPProjeto" VARCHAR(50),
+    "NOTipoApropriacao" VARCHAR(50)
+);
 
 CREATE TABLE "TBProjeto"
 (
@@ -200,6 +217,25 @@ CREATE TABLE "TBDispendioRecursosHumano"
     FOREIGN KEY ( "IDProjeto" ) REFERENCES "TBProjeto" ("IDProjeto"),
     FOREIGN KEY ( "IDProjetoConveniado" ) REFERENCES "TBProjetoConveniado" ("IDProjetoConveniado"),
     FOREIGN KEY ( "IDEstrangeiro" ) REFERENCES "TBEstrangeiro" ("IDEstrangeiro")
+);
+
+CREATE TABLE "TBDispendioEquipamentoSoftware"
+(
+    "IDDispendioEquipamentoSoftware" serial primary key not null,
+    "IDProjeto" INTEGER,
+    "IDProjetoConveniado" INTEGER,
+    "CDTipoDispendio" INTEGER,
+    "DSTipoDispendio" VARCHAR(100),
+    "CDTipoApropriacao" INTEGER,
+    "DSOutrosTipoApropriacao" VARCHAR(50),
+    "VLDispendio" NUMERIC,
+    "VLDepreciacao" NUMERIC,
+    "DTAquisicao" DATE,
+    "DSJustificativa" TEXT,
+    FOREIGN KEY ( "CDTipoDispendio" ) REFERENCES "TBTipoDispendio" ("CDTipoDispendio"),
+    FOREIGN KEY ( "CDTipoApropriacao" ) REFERENCES "TBTipoApropriacao" ("CDTipoApropriacao"),
+    FOREIGN KEY ( "IDProjeto" ) REFERENCES "TBProjeto" ("IDProjeto"),
+    FOREIGN KEY ( "IDProjetoConveniado" ) REFERENCES "TBProjetoConveniado" ("IDProjetoConveniado")
 );
 
 
@@ -443,14 +479,57 @@ VALUES
 INSERT INTO "TBEscolaridade"
     ("NOEscolaridade")
 VALUES
+
     ('Pós Doutorado' );
 
 -- DADOS TIPO DISPENDIO
 INSERT INTO "TBTipoDispendio"
-    ("NOTipoDispendio")
+    ("NOTipoDispendio", "TPDispendio")
 VALUES
-    ('RH Direto');
+    ('RH Direto', 1);
 INSERT INTO "TBTipoDispendio"
-    ("NOTipoDispendio")
+    ("NOTipoDispendio", "TPDispendio")
 VALUES
-    ('RH Indireto' );
+    ('RH Indireto', 1 );
+INSERT INTO "TBTipoDispendio"
+    ("NOTipoDispendio", "TPDispendio")
+VALUES
+    ('Software', 2);
+INSERT INTO "TBTipoDispendio"
+    ("NOTipoDispendio", "TPDispendio")
+VALUES
+    ('Equipamento- TICs', 2);
+INSERT INTO "TBTipoDispendio"
+    ("NOTipoDispendio", "TPDispendio")
+VALUES
+    ('Equipamento- Outros', 2);
+
+-- Tipo apropriação
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Licença anual');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Licença mensal');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Licença perpétua/vitalícia');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Aluguel');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Aquisição');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Cessão');
+INSERT INTO "TBTipoApropriacao"
+    ("NOTipoApropriacao")
+VALUES
+    ('Outro');

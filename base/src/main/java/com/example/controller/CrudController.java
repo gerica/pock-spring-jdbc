@@ -65,12 +65,12 @@ public abstract class CrudController {
 
 	@GetMapping("/{id}")
 	@ResponseBody
-	public ResponseEntity<Object> fetchById(@PathVariable int id) {
+	public ResponseEntity<List<Map<String, Object>>> fetchById(@PathVariable int id) {
 		if (appParams.getNameTable() == null || appParams.getNamePrimaryKey() == null) {
 			throw new RuntimeException("Informe o nome da tabela e o id.");
 		}
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(getFethByIdQuery(id), new Object[] {});
-		return ResponseEntity.ok().body(new ResponseWrapper(result));
+		return ResponseEntity.ok().body(result);
 	}
 
 	@PostMapping
