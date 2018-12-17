@@ -67,6 +67,9 @@ public class UtilAtributo {
 	 * @return
 	 */
 	private static Object getColumnWithType(Object value) {
+		if (value == null) {
+			return value;
+		}
 		if (value instanceof Integer) {
 			return value;
 		}

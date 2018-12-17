@@ -34,7 +34,7 @@ CREATE TABLE "TBInstituicao"
 CREATE TABLE "TBEstrangeiro"
 (
     "IDEstrangeiro" serial primary key not null,
-    "NRDispendio" VARCHAR(50),
+    "NRNome" VARCHAR(50),
     "NRNumero" VARCHAR(10),
     "NRPais" VARCHAR(50),
     "DTVencimento" DATE,
@@ -186,7 +186,9 @@ CREATE TABLE "TBDispendioRecursosHumano"
     "IDPessoaColaborador" INTEGER,
     "IDEstrangeiro" INTEGER,
     "IDProjeto" INTEGER,
+    "IDProjetoConveniado" INTEGER,
     "IDHistoricoPessoaColaborador" INTEGER,
+    "NRFormacaoEspecifica" varchar(50),
     "NRHorasTrabalhadas" varchar(8),
     "DTInicioAtuacao" date,
     "DTFinalAtuacao" date,
@@ -196,6 +198,7 @@ CREATE TABLE "TBDispendioRecursosHumano"
     FOREIGN KEY ( "CDEscolaridade" ) REFERENCES "TBEscolaridade" ("CDEscolaridade"),
     FOREIGN KEY ( "CDFormacao" ) REFERENCES "TBFormacao" ("CDFormacao"),
     FOREIGN KEY ( "IDProjeto" ) REFERENCES "TBProjeto" ("IDProjeto"),
+    FOREIGN KEY ( "IDProjetoConveniado" ) REFERENCES "TBProjetoConveniado" ("IDProjetoConveniado"),
     FOREIGN KEY ( "IDEstrangeiro" ) REFERENCES "TBEstrangeiro" ("IDEstrangeiro")
 );
 
