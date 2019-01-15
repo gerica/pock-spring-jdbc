@@ -15,22 +15,9 @@ import org.springframework.stereotype.Component;
 @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class AppParams {
 
-	@Value("${app.module.projeto}")
-	public String moduleProjeto;
-	@Value("${app.module.projeto.dispendio}")
-	public String moduleProjetoDispendio;
-
 	public String nameModule;
 	public String namePrimaryKey;
 	public String nameTable;
-
-	public String getModuleProjeto() {
-		return moduleProjeto;
-	}
-
-	public String getModuleProjetoDispendio() {
-		return moduleProjetoDispendio;
-	}
 
 	public String getNameModule() {
 		return nameModule;

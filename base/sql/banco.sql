@@ -219,6 +219,27 @@ CREATE TABLE "TBDispendioRecursosHumano"
     FOREIGN KEY ( "IDEstrangeiro" ) REFERENCES "TBEstrangeiro" ("IDEstrangeiro")
 );
 
+
+CREATE TABLE "TBPropriedadeIntelectual"
+(
+    "IDPropriedadeIntelectual" serial primary key not null,
+    "NRDescricao" VARCHAR(100),
+    "NRTipoPropriedadeIntelectual" VARCHAR(50),
+    "NRRegistroPedido" VARCHAR(50),
+    "DTPedido" DATE,
+    "NRSituacao" VARCHAR(50),
+    "NRLocal" VARCHAR(50)
+);
+
+CREATE TABLE "TBProjetoPropriedadeIntelectual"
+(
+    "IDProjetoPropriedadeIntelectual" serial primary key not null,
+    "IDPropriedadeIntelectual" INTEGER,
+    "IDProjeto" INTEGER,
+    FOREIGN KEY ( "IDPropriedadeIntelectual" ) REFERENCES "TBPropriedadeIntelectual" ("IDPropriedadeIntelectual"),
+    FOREIGN KEY ( "IDProjeto" ) REFERENCES "TBProjeto" ("IDProjeto")
+);
+
 CREATE TABLE "TBDispendioEquipamentoSoftware"
 (
     "IDDispendioEquipamentoSoftware" serial primary key not null,

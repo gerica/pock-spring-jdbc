@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.config;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,26 +28,34 @@ import com.example.controller.wrapper.ResponseWrapper;
 import com.example.util.AppParams;
 import com.example.util.UtilAtributo;
 
-public abstract class CrudController {
+@Component
+public class CrudController {
 
 	@Autowired
 	protected AppParams appParams;
 
-	protected String DELETE_TABLE = "DELETE FROM public.\"%s\" WHERE \"%s\"=%s";
-	protected String INSERT_TABLE = "INSERT INTO public.\"%s\"(%s) VALUES (%s)";
+	public String DELETE_TABLE = "DELETE FROM public.\"%s\" WHERE \"%s\"=%s";
+	public String INSERT_TABLE = "INSERT INTO public.\"%s\"(%s) VALUES (%s)";
 	@Autowired
-	protected JdbcTemplate jdbcTemplate;
-	protected String SELECT_FROM_ALL = "select * from \"%s\";";
-	protected String SELECT_FROM_ID = "select * from \"%s\" WHERE \"%s\"=%s";
-	protected String UPDATE_TABLE = "UPDATE public.\"%s\" SET %s WHERE \"%s\"=%s";
+	public JdbcTemplate jdbcTemplate;
+	public String SELECT_FROM_ALL = "select * from \"%s\";";
+	public String SELECT_FROM_ID = "select * from \"%s\" WHERE \"%s\"=%s";
+	public String UPDATE_TABLE = "UPDATE public.\"%s\" SET %s WHERE \"%s\"=%s";
 
 	public CrudController() {
 		super();
 	}
 
+	public void init() {
+		if (appParams.getNameTable() == null) {
+			throw new RuntimeException("Informe a tabela");
+		}
+	}
+
 	@DeleteMapping("/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> delete(@PathVariable int id) {
+		init();
 		if (appParams.getNameTable() == null || appParams.getNamePrimaryKey() == null) {
 			throw new RuntimeException("Informe o nome da tabela e o id.");
 		}
@@ -56,9 +65,7 @@ public abstract class CrudController {
 
 	@GetMapping()
 	public ResponseEntity<List<Map<String, Object>>> fetchAll() {
-		if (appParams.getNameTable() == null) {
-			throw new RuntimeException("Informe a tabela");
-		}
+		init();
 		List<Map<String, Object>> result = jdbcTemplate.queryForList(getFethAllQuery(), new Object[] {});
 		return ResponseEntity.ok().body(result);
 	}
@@ -66,6 +73,7 @@ public abstract class CrudController {
 	@GetMapping("/{id}")
 	@ResponseBody
 	public ResponseEntity<List<Map<String, Object>>> fetchById(@PathVariable int id) {
+		init();
 		if (appParams.getNameTable() == null || appParams.getNamePrimaryKey() == null) {
 			throw new RuntimeException("Informe o nome da tabela e o id.");
 		}
@@ -76,9 +84,7 @@ public abstract class CrudController {
 	@PostMapping
 	@PrepareEntity
 	public ResponseEntity<Serializable> save(@RequestBody Map<String, Object> mapJson) {
-		if (appParams.getNameTable() == null) {
-			throw new RuntimeException("Informe a tabela");
-		}
+		init();
 		for (String key : mapJson.keySet()) {
 			if (key == appParams.getNamePrimaryKey() || key.equalsIgnoreCase(appParams.getNamePrimaryKey())) {
 				return update(mapJson);
@@ -91,6 +97,7 @@ public abstract class CrudController {
 	@PostMapping("/saveAndReturnId")
 	@PrepareEntity
 	public ResponseEntity<Serializable> saveAndReturnId(@RequestBody Map<String, Object> entity) {
+		init();
 		Integer id = saveOrUpdate(entity);
 		if (id == null) {
 			id = (Integer) entity.get(appParams.getNamePrimaryKey());
@@ -98,7 +105,7 @@ public abstract class CrudController {
 		return ResponseEntity.ok().body(new ResponseWrapper(id));
 	}
 
-	protected void attrNameModule(Map<String, Object> entity) {
+	public void attrNameModule(Map<String, Object> entity) {
 		String string = "module";
 		for (Iterator<String> iterator = entity.keySet().iterator(); iterator.hasNext();) {
 			String key = (String) iterator.next();
@@ -111,19 +118,19 @@ public abstract class CrudController {
 		}
 	}
 
-	protected String getDeleteQuery(Object id) {
+	public String getDeleteQuery(Object id) {
 		return String.format(DELETE_TABLE, appParams.getNameTable(), appParams.getNamePrimaryKey(), id);
 	}
 
-	protected String getFethAllQuery() {
+	public String getFethAllQuery() {
 		return String.format(SELECT_FROM_ALL, appParams.getNameTable());
 	}
 
-	protected String getFethByIdQuery(Object id) {
+	public String getFethByIdQuery(Object id) {
 		return String.format(SELECT_FROM_ID, appParams.getNameTable(), appParams.getNamePrimaryKey(), id);
 	}
 
-	protected ResponseEntity<Serializable> insert(Map<String, Object> mapJson) {
+	public ResponseEntity<Serializable> insert(Map<String, Object> mapJson) {
 		String namesColumns = mapJson.keySet().stream().map(e -> "\"" + e.toString() + "\"").collect(Collectors.joining(","));
 		String valuesColumns = mapJson.keySet().stream().map(e -> "?").collect(Collectors.joining(","));
 
@@ -131,7 +138,7 @@ public abstract class CrudController {
 		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
 	}
 
-	protected Integer insertReturnId(Map<String, Object> mapJson) {
+	public Integer insertReturnId(Map<String, Object> mapJson) {
 //		String[] columnNames = mapJson.keySet().toArray(new String[mapJson.size()]);
 		String namesColumns = mapJson.keySet().stream().map(e -> "\"" + e.toString() + "\"").collect(Collectors.joining(","));
 		String valuesColumns = mapJson.keySet().stream().map(e -> "?").collect(Collectors.joining(","));
@@ -152,7 +159,7 @@ public abstract class CrudController {
 		return (Integer) keyHolder.getKey();
 	}
 
-	protected Integer saveOrUpdate(Map<String, Object> entity) {
+	public Integer saveOrUpdate(Map<String, Object> entity) {
 		if (entity != null) {
 			for (String key : entity.keySet()) {
 				if (key == appParams.getNamePrimaryKey() || key.equals(appParams.getNamePrimaryKey())) {
@@ -168,6 +175,14 @@ public abstract class CrudController {
 	protected ResponseEntity<Serializable> update(Map<String, Object> mapJson) {
 		int rowAffected = jdbcTemplate.update(UtilAtributo.prepararUpdate(mapJson, UPDATE_TABLE, appParams.getNameTable(), appParams.getNamePrimaryKey()));
 		return ResponseEntity.ok().body(new ResponseWrapper(rowAffected));
+	}
+
+	public AppParams getAppParams() {
+		return appParams;
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
 	}
 
 }
